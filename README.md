@@ -105,12 +105,12 @@ Ambiente: Espaço sideral (campo aberto com zonas de combate)
 
 **9- Controles**
 
-W / ↑ → mover para cima
-S / ↓ → mover para baixo
-A / ← → mover para esquerda
-D / → → mover para direita
-Espaço → atirar
-ESC → pausa
+- W / ↑ → mover para cima
+- S / ↓ → mover para baixo
+- A / ← → mover para esquerda
+- D / → → mover para direita
+- Espaço → atirar
+- ESC → pausa
 
 **10- Fluxo do Jogo**
 
@@ -134,18 +134,18 @@ ESC → pausa
 
 **12- Estrutura do projeto**
 
-/Starfall-Last-Shelter
-│── main.py
-│── player.py
-│── enemy.py
-│── boss.py
-│── map.py
-│── projectile.py
-│── utils/
-│── assets/
-│   ├── sprites/
-│   ├── sounds/
-│── README.md
+- /Starfall-Last-Shelter
+- │── main.py
+- │── player.py
+- │── enemy.py
+- │── boss.py
+- │── map.py
+- │── projectile.py
+- │── utils/
+- │── assets/
+- │   ├── sprites/
+- │   ├── sounds/
+- │── README.md
 
 **13- Funcionalidades Mínimas**
 
