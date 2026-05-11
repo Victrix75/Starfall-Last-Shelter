@@ -162,6 +162,6 @@ Ambiente: Espaço sideral (campo aberto com zonas de combate)
 - Animações mais detalhadas
 - Cutscenes para contar a história
 - Sistema de níveis/fases
-- Criação de um "especial" pra o jogador, que carrega com o tempo
+- Criação de um "especial" pra o jogador, que carrega com o tempo.
 
 
