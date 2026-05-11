@@ -141,7 +141,6 @@ Ambiente: Espaço sideral (campo aberto com zonas de combate)
 - │── boss.py
 - │── map.py
 - │── projectile.py
-- │── utils/
 - │── assets/
 - │   ├── sprites/
 - │   ├── sounds/
