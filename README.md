@@ -136,12 +136,9 @@ Ambiente: Espaço sideral (campo aberto com zonas de combate)
 
 - /Starfall-Last-Shelter
 - │── main.py
-- │── player.py
-- │── enemy.py
-- │── boss.py
+- │── personagens.py
 - │── map.py
-- │── projectile.py
-- │── assets/
+- │── front/
 - │   ├── sprites/
 - │   ├── sounds/
 - │── README.md
