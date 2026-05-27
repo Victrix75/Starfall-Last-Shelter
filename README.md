@@ -162,3 +162,24 @@ Ambiente: Espaço sideral (campo aberto com zonas de combate)
 - Criação de um "especial" pra o jogador, que carrega com o tempo.
 
 
+**objetivos para o segundo bimestre:**
+
+*Primeira semana*
+- criação do objeto “personagem”.
+- criação do objeto “projetil”.
+*Segunda semana*
+- exibição do objeto “personagem” na tela.
+- movimentação do objeto “personagem”.
+*Terceira semana*
+- criação do objeto “inimigo”.
+- exibição do objeto “inimigo”.
+*Quarta semana*
+- inicio da implementação dos sprites na tela.
+- movimentação do objeto “inimigo”
+*Quinta semana*
+- inicio da seleção dos cenários.
+- implementação do primeiro cenário.
+*Sexta semana*
+- criação do roteiro das cutcines.
+- inicio da seleção da soundtrack.
+
