@@ -4,10 +4,9 @@ from telas import Telas
 
 pygame.init()
 
-info = pygame.display.Info()
-tela_cheia = (info.current_w, info.current_h)
+tela = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
-tela = pygame.display.set_mode(tela_cheia)
+pygame.display.set_caption("StarFall-Last-Shelter")
 
 pygame.display.set_caption("StarFall-Last-Shelter")
 
@@ -51,7 +50,7 @@ while rodando:
 
     elif estado_atual == "jogo":
 
-        nave.mover()
+        nave.mover(tela)
         nave.desenhar(tela)
 
     elif estado_atual == "creditos":

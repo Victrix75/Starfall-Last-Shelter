@@ -1,5 +1,6 @@
 import pygame
 import os
+from telas import *
 
 TAMANHO = 160
 
@@ -97,7 +98,7 @@ class Nave(Sprites):
 
         self.carregar_sprites()
 
-    def mover(self):
+    def mover(self, tela):
 
         teclas = pygame.key.get_pressed()
 
@@ -116,6 +117,26 @@ class Nave(Sprites):
         if teclas[pygame.K_s]:
             self.y += self.vel
             self.direcao = "baixo"
+
+        # Tamanho da tela
+        largura_tela = tela.get_width()
+        altura_tela = tela.get_height()
+
+        # Limite esquerdo
+        if self.x < 0:
+            self.x = 0
+
+        # Limite direito
+        if self.x > largura_tela - TAMANHO:
+            self.x = largura_tela - TAMANHO
+
+        # Limite superior
+        if self.y < 0:
+            self.y = 0
+
+        # Limite inferior
+        if self.y > altura_tela - TAMANHO:
+            self.y = altura_tela - TAMANHO
 
         self.atualizar_animacao()
 

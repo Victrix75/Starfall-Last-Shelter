@@ -16,6 +16,8 @@ class Telas:
         largura_tela = self.tela.get_width()
         altura_tela = self.tela.get_height()
 
+        
+
         # Tamanho dos botões
         largura_botao = 250
         altura_botao = 60
