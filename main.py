@@ -1,13 +1,11 @@
 import pygame
 from personagens import Nave
 from telas import Telas
+from cenario import Cenario  # <-- 1. IMPORTAMOS O CENÁRIO
 
 pygame.init()
 
 tela = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-
-pygame.display.set_caption("StarFall-Last-Shelter")
-
 pygame.display.set_caption("StarFall-Last-Shelter")
 
 cor_fundo = (30, 30, 30)
@@ -18,8 +16,8 @@ fps = 60
 estado_atual = "menu"
 
 nave = Nave()
-
 telas = Telas(tela)
+cenario = Cenario(tela)  # <-- 2. CRIAMOS A INSTÂNCIA DO CENÁRIO
 
 rodando = True
 
@@ -49,7 +47,10 @@ while rodando:
         telas.menu()
 
     elif estado_atual == "jogo":
+        # <-- 3. DESENHAMOS O CENÁRIO PRIMEIRO (FICA AO FUNDO)
+        cenario.desenhar()
 
+        # <-- 4. DEPOIS MOVEMOS E DESENHAMOS A NAVE (FICA POR CIMA)
         nave.mover(tela)
         nave.desenhar(tela)
 
