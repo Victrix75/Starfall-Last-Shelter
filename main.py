@@ -1,7 +1,7 @@
 import pygame
 from personagens import Nave
 from telas import Telas
-from cenario import Cenario  # <-- 1. IMPORTAMOS O CENÁRIO
+from cenario import Cenario
 
 pygame.init()
 
@@ -17,6 +17,7 @@ estado_atual = "menu"
 
 nave = Nave()
 telas = Telas(tela)
+nave.projeteis.clear()
 cenario = Cenario(tela)  # <-- 2. CRIAMOS A INSTÂNCIA DO CENÁRIO
 
 rodando = True
