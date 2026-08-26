@@ -2,7 +2,7 @@ import pygame
 import os
 from telas import *
 
-TAMANHO = 160
+TAMANHO = 140
 
 ASSETS = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),

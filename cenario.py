@@ -22,7 +22,7 @@ class Cenario:
         altura_tela = self.tela.get_height()
 
         # Lista com os nomes exatos das duas imagens do fundo
-        arquivos_cenario = ["cenariodireita0.png", "cenariodireita1.jpg"]
+        arquivos_cenario = ["cenario0.png"]
 
         for nome_arquivo in arquivos_cenario:
             caminho = os.path.join(ASSETS, nome_arquivo)
