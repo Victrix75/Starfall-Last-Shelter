@@ -88,3 +88,5 @@ class Telas:
 
         # Desenha o botão voltar no canto superior direito
         self.desenhar_voltar()
+
+
