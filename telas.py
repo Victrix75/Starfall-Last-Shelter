@@ -1,4 +1,13 @@
+import os
+
 import pygame
+
+
+ASSETS = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "front",
+    "sprites"
+)
 
 class Telas:
 
@@ -12,6 +21,13 @@ class Telas:
         # 2. Dimensões da tela
         largura_tela = self.tela.get_width()
         altura_tela = self.tela.get_height()
+
+        caminho_fundo = os.path.join(ASSETS, "fundo.png")
+        self.fundo = pygame.image.load(caminho_fundo).convert()
+        self.fundo = pygame.transform.scale(
+            self.fundo,
+            (largura_tela, altura_tela)
+        )
 
         # 3. Configuração dos botões do Menu Principal
         largura_botao = 250
@@ -47,6 +63,8 @@ class Telas:
 
     def menu(self):
         """Desenha os botões da tela de Menu Principal."""
+        self.tela.blit(self.fundo, (0, 0))
+
         botoes = [
             (self.bot_jogar, self.txt_jogar),
             (self.bot_creditos, self.txt_creditos),
