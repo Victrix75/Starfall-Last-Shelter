@@ -1,6 +1,7 @@
 import pygame
 import os
 from telas import *
+import random
 
 TAMANHO = 140
 
@@ -155,3 +156,117 @@ class Nave(Sprites):
                 (0, 255, 0),
                 (self.x, self.y, TAMANHO, TAMANHO)
             )
+
+
+class Inimigo(Sprites):
+    def __init__(self, x_origem, y_origem):
+        super().__init__()
+        self.x_origem = x_origem
+        self.y_origem = y_origem
+        self.x = x_origem
+        self.y = y_origem
+        self.vel = 4
+       
+        # Estados: "grade", "atancando", "retornando"
+        self.estado = "grade"
+        self.vel_x = 0
+        self.vel_y = 0
+        self.carregar_sprites()
+
+
+    def iniciar_ataque(self, pos_jogador):
+        if self.estado == "grade":
+            self.estado = "atacando"
+            # Calcula vetor em direção ao jogador
+            dx = pos_jogador[0] - self.x
+            dy = pos_jogador[1] - self.y
+            distancia = (dx**2 + dy**2) ** 0.5
+            if distancia > 0:
+                self.vel_x = (dx / distancia) * self.vel
+                self.vel_y = (dy / distancia) * self.vel
+
+
+    def atualizar(self, offset_x):
+        if self.estado == "grade":
+            # Acompanha o movimento lateral da formação
+            self.x = self.x_origem + offset_x
+            self.y = self.y_origem
+        elif self.estado == "atacando":
+            self.x += self.vel_x
+            self.y += self.vel_y
+            # Se passar da parte inferior da tela, reaparece no topo
+            if self.y > 1080:  
+                self.y = -50
+                self.estado = "retornando"
+        elif self.estado == "retornando":
+            # Volta para a posição original na grade
+            dx = (self.x_origem + offset_x) - self.x
+            dy = self.y_origem - self.y
+            distancia = (dx**2 + dy**2) ** 0.5
+           
+            if distancia < 5:
+                self.estado = "grade"
+            else:
+                self.x += (dx / distancia) * self.vel
+                self.y += (dy / distancia) * self.vel
+
+
+        self.atualizar_animacao()
+
+
+    def desenhar(self, tela):
+        sprite = self.sprite_atual()
+        if sprite:
+            tela.blit(sprite, (self.x, self.y))
+        else:
+            pygame.draw.rect(tela, (255, 0, 0), (self.x, self.y, 60, 60))
+
+
+
+
+class FrotaInimigos:
+    def __init__(self, linhas=2, colunas=6, pode_atacar= False):
+        self.inimigos = []
+        self.offset_x = 0
+        # self.dir_frota = 1
+        # self.largura_frota = 600
+        self.tempo_ultimo_ataque = pygame.time.get_ticks()
+        self.pode_atacar = pode_atacar
+        self.largura_grade = (colunas-1) * 80
+        self.x_centro_base = 400
+       
+        # Criar grade de inimigos
+        for l in range(linhas):
+            for c in range(colunas):
+                x = (self.x_centro_base - self.largura_grade //2) + (c * 80)
+                #x = 200 + c * 80
+                y = 80 + l * 70
+                self.inimigos.append(Inimigo(x, y))
+
+
+    def atualizar(self, pos_jogador):
+        # Oscilação da frota para esquerda e direita
+        x_jogador = pos_jogador[0]
+        diferenca_x = x_jogador - (self.x_centro_base + self.offset_x)
+        self.offset_x += diferenca_x * 0.007
+       
+        # Sorteia um inimigo para atacar a cada 2 segundos
+        if self.pode_atacar:
+            agora = pygame.time.get_ticks()
+           
+            if agora - self.tempo_ultimo_ataque > 2000 and self.inimigos:
+                inimigos_disponiveis = [i for i in self.inimigos if i.estado == "grade"]
+           
+                if inimigos_disponiveis:
+                    atacante = random.choice(inimigos_disponiveis)
+                    atacante.iniciar_ataque(pos_jogador)
+                self.tempo_ultimo_ataque = agora
+
+
+        for inimigo in self.inimigos:
+            inimigo.atualizar(self.offset_x)
+
+
+    def desenhar(self, tela):
+        for inimigo in self.inimigos:
+            inimigo.desenhar(tela)

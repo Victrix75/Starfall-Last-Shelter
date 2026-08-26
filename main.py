@@ -1,6 +1,6 @@
 import pygame
 from cenario import Cenario
-from personagens import Nave
+from personagens import Nave, FrotaInimigos
 from telas import Telas
 
 pygame.init()
@@ -16,7 +16,7 @@ relogio = pygame.time.Clock()
 fps = 60
 estado_atual = "menu"
 
-
+frota = FrotaInimigos(linhas=3, colunas=8, pode_atacar=False)
 nave = Nave()
 telas = Telas(tela)
 cenario = Cenario(tela)
@@ -61,6 +61,9 @@ while rodando:
 
         nave.mover(tela)
         nave.desenhar(tela)
+        frota.atualizar((nave.x, nave.y))
+        frota.desenhar(tela)
+
 
         if hasattr(telas, "desenhar_voltar"):
             telas.desenhar_voltar()
