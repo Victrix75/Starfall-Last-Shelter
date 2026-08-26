@@ -56,27 +56,33 @@ class Projetil:
         self.x = projx
         self.y = projy
         self.vel = 12
+        self.largura = 6
+        self.altura = 16
+        # Retângulo para cálculo de colisão
+        self.rect = pygame.Rect(self.x, self.y, self.largura, self.altura)
 
     def atualizar(self):
         self.y -= self.vel
+        self.rect.y = self.y
 
     def desenhar(self, tela):
         pygame.draw.rect(
             tela,
             (0, 255, 255),
-            (self.x, self.y, 5, 15)
+            self.rect
         )
 
 
 class Nave(Sprites):
     def __init__(self):
         super().__init__()
-
         self.x = 380
         self.y = 500
         self.vel = 10
         self.projeteis = []
-        self.cooldown_tiro = 0
+        
+        self.tempo_ultimo_tiro = 0
+        self.cooldown_tiro = 250  # Intervalo entre tiros em ms
 
         self.carregar_sprites()
 
@@ -84,29 +90,28 @@ class Nave(Sprites):
         teclas = pygame.key.get_pressed()
 
         # Movimentação
-        if teclas[pygame.K_a]:
+        if teclas[pygame.K_a] or teclas[pygame.K_LEFT]:
             self.x -= self.vel
             self.direcao = "esquerda"
 
-        if teclas[pygame.K_d]:
+        if teclas[pygame.K_d] or teclas[pygame.K_RIGHT]:
             self.x += self.vel
             self.direcao = "direita"
 
-        if teclas[pygame.K_w]:
+        if teclas[pygame.K_w] or teclas[pygame.K_UP]:
             self.y -= self.vel
             self.direcao = "cima"
 
-        if teclas[pygame.K_s]:
+        if teclas[pygame.K_s] or teclas[pygame.K_DOWN]:
             self.y += self.vel
             self.direcao = "baixo"
 
-        # Disparo de tiro (Espaço)
-        if teclas[pygame.K_SPACE] and self.cooldown_tiro == 0:
-            self.atirar()
-            self.cooldown_tiro = 15
-
-        if self.cooldown_tiro > 0:
-            self.cooldown_tiro -= 1
+        # Disparo de tiro
+        if teclas[pygame.K_SPACE]:
+            agora = pygame.time.get_ticks()
+            if agora - self.tempo_ultimo_tiro >= self.cooldown_tiro:
+                self.atirar()
+                self.tempo_ultimo_tiro = agora
 
         # Limites da tela
         largura_tela = tela.get_width()
@@ -128,25 +133,21 @@ class Nave(Sprites):
         self.atualizar_projeteis()
 
     def atirar(self):
-        # Centraliza o projétil na parte superior da nave
-        pos_x = self.x + (TAMANHO // 2) - 2
+        pos_x = self.x + (TAMANHO // 2) - 3
         pos_y = self.y
         novo_projetil = Projetil(pos_x, pos_y)
         self.projeteis.append(novo_projetil)
 
     def atualizar_projeteis(self):
-        # Atualiza a posição e remove tiros fora da tela
         for proj in self.projeteis[:]:
             proj.atualizar()
             if proj.y < -15:
                 self.projeteis.remove(proj)
 
     def desenhar(self, tela):
-        # 1. Desenha os projéteis
         for proj in self.projeteis:
             proj.desenhar(tela)
 
-        # 2. Desenha o sprite da nave
         sprite = self.sprite_atual()
         if sprite:
             tela.blit(sprite, (self.x, self.y))
@@ -166,18 +167,21 @@ class Inimigo(Sprites):
         self.x = x_origem
         self.y = y_origem
         self.vel = 4
-       
-        # Estados: "grade", "atancando", "retornando"
+        
+        # Sistema de Vida e Tamanho da Hitbox
+        self.vida = 3
+        self.largura = 60
+        self.altura = 60
+        self.rect = pygame.Rect(self.x, self.y, self.largura, self.altura)
+
         self.estado = "grade"
         self.vel_x = 0
         self.vel_y = 0
         self.carregar_sprites()
 
-
     def iniciar_ataque(self, pos_jogador):
         if self.estado == "grade":
             self.estado = "atacando"
-            # Calcula vetor em direção ao jogador
             dx = pos_jogador[0] - self.x
             dy = pos_jogador[1] - self.y
             distancia = (dx**2 + dy**2) ** 0.5
@@ -185,87 +189,93 @@ class Inimigo(Sprites):
                 self.vel_x = (dx / distancia) * self.vel
                 self.vel_y = (dy / distancia) * self.vel
 
-
     def atualizar(self, offset_x):
         if self.estado == "grade":
-            # Acompanha o movimento lateral da formação
             self.x = self.x_origem + offset_x
             self.y = self.y_origem
         elif self.estado == "atacando":
             self.x += self.vel_x
             self.y += self.vel_y
-            # Se passar da parte inferior da tela, reaparece no topo
             if self.y > 1080:  
                 self.y = -50
                 self.estado = "retornando"
         elif self.estado == "retornando":
-            # Volta para a posição original na grade
             dx = (self.x_origem + offset_x) - self.x
             dy = self.y_origem - self.y
             distancia = (dx**2 + dy**2) ** 0.5
-           
+            
             if distancia < 5:
                 self.estado = "grade"
             else:
                 self.x += (dx / distancia) * self.vel
                 self.y += (dy / distancia) * self.vel
 
+        # Atualiza o retângulo de colisão junto com o movimento
+        self.rect.x = self.x
+        self.rect.y = self.y
 
         self.atualizar_animacao()
-
 
     def desenhar(self, tela):
         sprite = self.sprite_atual()
         if sprite:
             tela.blit(sprite, (self.x, self.y))
         else:
-            pygame.draw.rect(tela, (255, 0, 0), (self.x, self.y, 60, 60))
-
-
+            # Alterna a cor dependendo da vida (Retângulo fallback)
+            cor = (255, 0, 0)
+            if self.vida == 2:
+                cor = (200, 100, 0)
+            elif self.vida == 1:
+                cor = (255, 255, 0)
+            pygame.draw.rect(tela, cor, self.rect)
 
 
 class FrotaInimigos:
-    def __init__(self, linhas=2, colunas=6, pode_atacar= False):
+    def __init__(self, linhas=2, colunas=6, pode_atacar=False):
         self.inimigos = []
         self.offset_x = 0
-        # self.dir_frota = 1
-        # self.largura_frota = 600
         self.tempo_ultimo_ataque = pygame.time.get_ticks()
         self.pode_atacar = pode_atacar
-        self.largura_grade = (colunas-1) * 80
+        self.largura_grade = (colunas - 1) * 80
         self.x_centro_base = 400
-       
-        # Criar grade de inimigos
+        
         for l in range(linhas):
             for c in range(colunas):
-                x = (self.x_centro_base - self.largura_grade //2) + (c * 80)
-                #x = 200 + c * 80
+                x = (self.x_centro_base - self.largura_grade // 2) + (c * 80)
                 y = 80 + l * 70
                 self.inimigos.append(Inimigo(x, y))
 
-
     def atualizar(self, pos_jogador):
-        # Oscilação da frota para esquerda e direita
         x_jogador = pos_jogador[0]
         diferenca_x = x_jogador - (self.x_centro_base + self.offset_x)
         self.offset_x += diferenca_x * 0.007
-       
-        # Sorteia um inimigo para atacar a cada 2 segundos
+        
         if self.pode_atacar:
             agora = pygame.time.get_ticks()
-           
             if agora - self.tempo_ultimo_ataque > 2000 and self.inimigos:
                 inimigos_disponiveis = [i for i in self.inimigos if i.estado == "grade"]
-           
                 if inimigos_disponiveis:
                     atacante = random.choice(inimigos_disponiveis)
                     atacante.iniciar_ataque(pos_jogador)
                 self.tempo_ultimo_ataque = agora
 
-
         for inimigo in self.inimigos:
             inimigo.atualizar(self.offset_x)
 
+    def checar_colisoes(self, projeteis):
+        """Processa as colisões entre projéteis da nave e a frota de inimigos"""
+        for proj in projeteis[:]:
+            for inimigo in self.inimigos[:]:
+                if inimigo.rect.colliderect(proj.rect):
+                    inimigo.vida -= 1  # Subtrai 1 de vida por acerto
+                    
+                    if proj in projeteis:
+                        projeteis.remove(proj)  # Destrói o tiro atingido
+                    
+                    if inimigo.vida <= 0:
+                        self.inimigos.remove(inimigo)  # Destrói o inimigo com 0 de vida
+                    
+                    break  # Para de testar este projétil já destruído
 
     def desenhar(self, tela):
         for inimigo in self.inimigos:

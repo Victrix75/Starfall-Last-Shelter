@@ -62,6 +62,8 @@ while rodando:
         nave.mover(tela)
         nave.desenhar(tela)
         frota.atualizar((nave.x, nave.y))
+        frota.checar_colisoes(nave.projeteis)
+
         frota.desenhar(tela)
 
 
