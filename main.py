@@ -4,22 +4,27 @@ from personagens import Nave, FrotaInimigos
 from telas import Telas
 
 pygame.init()
+pygame.font.init()
 
 info = pygame.display.Info()
 tela_cheia = (info.current_w, info.current_h)
 tela = pygame.display.set_mode(tela_cheia)
 pygame.display.set_caption("StarFall-Last-Shelter")
 
-
 cor_fundo = (30, 30, 30)
 relogio = pygame.time.Clock()
 fps = 60
 estado_atual = "menu"
 
-frota = FrotaInimigos(linhas=3, colunas=8, pode_atacar=False)
+# Configuração de Fonte da HUD
+fonte_hud = pygame.font.SysFont("arial", 28, bold=True)
+
+frota = FrotaInimigos(linhas=2, colunas=3, pode_atacar=True)
 nave = Nave()
 telas = Telas(tela)
 cenario = Cenario(tela)
+
+pontuacao = 0
 
 rodando = True
 
@@ -29,16 +34,15 @@ while rodando:
             rodando = False
 
         if evento.type == pygame.MOUSEBUTTONDOWN:
-
-# Menu Principal
             if estado_atual == "menu":
                 if telas.bot_sair.collidepoint(evento.pos):
                     rodando = False
 
                 elif telas.bot_jogar.collidepoint(evento.pos):
-# Limpa projéteis acumulados antes de iniciar a partida
-                    if hasattr(nave, "projeteis"):
-                        nave.projeteis.clear()
+                    # Reinicia variáveis do jogo ao dar Play
+                    frota = FrotaInimigos(linhas=2, colunas=6, pode_atacar=True)
+                    nave = Nave()
+                    pontuacao = 0
                     estado_atual = "jogo"
 
                 elif telas.bot_creditos.collidepoint(evento.pos):
@@ -61,11 +65,24 @@ while rodando:
 
         nave.mover(tela)
         nave.desenhar(tela)
+
         frota.atualizar((nave.x, nave.y))
-        frota.checar_colisoes(nave.projeteis)
+        
+        # Computa colisões e adiciona os pontos
+        pontos = frota.checar_colisoes(nave.projeteis, nave)
+        pontuacao += pontos
 
         frota.desenhar(tela)
 
+        # Exibição de HUD (Pontos e Vidas)
+        texto_pontos = fonte_hud.render(f"Pontos: {pontuacao}", True, (255, 255, 255))
+        texto_vidas = fonte_hud.render(f"Vidas: {nave.vida}", True, (255, 50, 50))
+        tela.blit(texto_pontos, (20, 20))
+        tela.blit(texto_vidas, (20, 55))
+
+        # Checa condição de Game Over
+        if nave.vida <= 0:
+            estado_atual = "menu"
 
         if hasattr(telas, "desenhar_voltar"):
             telas.desenhar_voltar()

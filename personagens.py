@@ -79,12 +79,19 @@ class Nave(Sprites):
         self.x = 380
         self.y = 500
         self.vel = 10
+        self.vida = 4
         self.projeteis = []
         
         self.tempo_ultimo_tiro = 0
         self.cooldown_tiro = 250  # Intervalo entre tiros em ms
 
         self.carregar_sprites()
+
+    def reiniciar(self):
+        self.x = 380
+        self.y = 500
+        self.vida = 4
+        self.projeteis_clear()
 
     def mover(self, tela):
         teclas = pygame.key.get_pressed()
@@ -169,7 +176,7 @@ class Inimigo(Sprites):
         self.vel = 4
         
         # Sistema de Vida e Tamanho da Hitbox
-        self.vida = 3
+        self.vida = 2
         self.largura = 60
         self.altura = 60
         self.rect = pygame.Rect(self.x, self.y, self.largura, self.altura)
@@ -229,54 +236,94 @@ class Inimigo(Sprites):
                 cor = (255, 255, 0)
             pygame.draw.rect(tela, cor, self.rect)
 
+class ProjetilInimigo:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.vel = 6
+        self.largura = 6
+        self.altura = 16
+        self.rect = pygame.Rect(self.x, self.y, self.largura, self.altura)
+
+    def atualizar(self):
+        self.y += self.vel  # vai pra baixo
+        self.rect.y = self.y
+
+    def desenhar(self, tela):
+        pygame.draw.rect(tela, (255, 50, 50), self.rect)  # tiro vermelho
+
 
 class FrotaInimigos:
-    def __init__(self, linhas=2, colunas=6, pode_atacar=False):
+    def __init__(self, linhas=2, colunas=3, pode_atacar=True):
         self.inimigos = []
+        self.projeteis = [] 
         self.offset_x = 0
-        self.tempo_ultimo_ataque = pygame.time.get_ticks()
+        self.tempo_ultimo_tiro = pygame.time.get_ticks()
+        self.cooldown_tiro = 1200
         self.pode_atacar = pode_atacar
-        self.largura_grade = (colunas - 1) * 80
+        self.largura_grade = (colunas - 1) * 60
         self.x_centro_base = 400
         
         for l in range(linhas):
             for c in range(colunas):
                 x = (self.x_centro_base - self.largura_grade // 2) + (c * 80)
-                y = 80 + l * 70
+                y = 60 + l * 70
                 self.inimigos.append(Inimigo(x, y))
 
     def atualizar(self, pos_jogador):
         x_jogador = pos_jogador[0]
         diferenca_x = x_jogador - (self.x_centro_base + self.offset_x)
         self.offset_x += diferenca_x * 0.007
+
+        agora = pygame.time.get_ticks()
         
-        if self.pode_atacar:
-            agora = pygame.time.get_ticks()
-            if agora - self.tempo_ultimo_ataque > 2000 and self.inimigos:
-                inimigos_disponiveis = [i for i in self.inimigos if i.estado == "grade"]
-                if inimigos_disponiveis:
-                    atacante = random.choice(inimigos_disponiveis)
-                    atacante.iniciar_ataque(pos_jogador)
-                self.tempo_ultimo_ataque = agora
+        # Apenas atira nos jogadores (Sem mergulho)
+        if self.pode_atacar and self.inimigos:
+            if agora - self.tempo_ultimo_tiro > self.cooldown_tiro:
+                atirador = random.choice(self.inimigos)
+                px = atirador.x + (atirador.largura // 2) - 3
+                py = atirador.y + atirador.altura
+                self.projeteis.append(ProjetilInimigo(px, py))
+                self.tempo_ultimo_tiro = agora
 
         for inimigo in self.inimigos:
             inimigo.atualizar(self.offset_x)
 
-    def checar_colisoes(self, projeteis):
-        """Processa as colisões entre projéteis da nave e a frota de inimigos"""
-        for proj in projeteis[:]:
+        for proj in self.projeteis[:]:
+            proj.atualizar()
+            if proj.y > 1080:
+                self.projeteis.remove(proj)
+
+    def checar_colisoes(self, projeteis_nave, nave=None):
+        pontos_ganhos = 0
+
+        # Colisão: Projéteis da Nave vs Inimigos
+        for proj in projeteis_nave[:]:
             for inimigo in self.inimigos[:]:
                 if inimigo.rect.colliderect(proj.rect):
-                    inimigo.vida -= 1  # Subtrai 1 de vida por acerto
+                    inimigo.vida -= 1
                     
-                    if proj in projeteis:
-                        projeteis.remove(proj)  # Destrói o tiro atingido
+                    if proj in projeteis_nave:
+                        projeteis_nave.remove(proj)
                     
                     if inimigo.vida <= 0:
-                        self.inimigos.remove(inimigo)  # Destrói o inimigo com 0 de vida
-                    
-                    break  # Para de testar este projétil já destruído
+                        self.inimigos.remove(inimigo)
+                        pontos_ganhos += 5  # +5 Pontos por inimigo destruído
+                    break
+
+        # Colisão: Projéteis do Inimigo vs Player
+        if nave:
+            rect_nave = pygame.Rect(nave.x, nave.y, TAMANHO, TAMANHO)
+            for proj in self.projeteis[:]:
+                if rect_nave.colliderect(proj.rect):
+                    self.projeteis.remove(proj)
+                    nave.vida -= 1  # Tira 1 vida ao ser atingido
+
+        return pontos_ganhos
 
     def desenhar(self, tela):
         for inimigo in self.inimigos:
             inimigo.desenhar(tela)
+
+        for proj in self.projeteis:
+            proj.desenhar(tela)
