@@ -177,8 +177,8 @@ class Inimigo(Sprites):
         
         # Sistema de Vida e Tamanho da Hitbox
         self.vida = 2
-        self.largura = 60
-        self.altura = 60
+        self.largura = 140
+        self.altura = 140
         self.rect = pygame.Rect(self.x, self.y, self.largura, self.altura)
 
         self.estado = "grade"
@@ -254,20 +254,22 @@ class ProjetilInimigo:
 
 
 class FrotaInimigos:
-    def __init__(self, linhas=2, colunas=3, pode_atacar=True):
+    def __init__(self, linhas=2, colunas=3, pode_atacar=True, espacamento_x=90, espacamento_y=120):
         self.inimigos = []
         self.projeteis = [] 
         self.offset_x = 0
         self.tempo_ultimo_tiro = pygame.time.get_ticks()
         self.cooldown_tiro = 1200
         self.pode_atacar = pode_atacar
-        self.largura_grade = (colunas - 1) * 60
+        self.espacamento_x = max(espacamento_x, 70)
+        self.espacamento_y = max(espacamento_y, 100)
+        self.largura_grade = (colunas - 1) * self.espacamento_x
         self.x_centro_base = 400
         
         for l in range(linhas):
             for c in range(colunas):
-                x = (self.x_centro_base - self.largura_grade // 2) + (c * 80)
-                y = 60 + l * 70
+                x = (self.x_centro_base - self.largura_grade // 2) + (c * self.espacamento_x)
+                y = 60 + l * self.espacamento_y
                 self.inimigos.append(Inimigo(x, y))
 
     def atualizar(self, pos_jogador):
