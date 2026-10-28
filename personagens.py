@@ -264,15 +264,15 @@ class ProjetilInimigo:
 
 
 class FrotaInimigos:
-    def __init__(self, linhas=2, colunas=3, pode_atacar=True, espacamento_x=90, espacamento_y=120):
+    def __init__(self, linhas=2, colunas=3, pode_atacar=True, espacamento_x=70, espacamento_y=100):
         self.inimigos = []
         self.projeteis = [] 
         self.offset_x = 0
         self.tempo_ultimo_tiro = pygame.time.get_ticks()
         self.cooldown_tiro = 1200
         self.pode_atacar = pode_atacar
-        self.espacamento_x = max(espacamento_x, 70)
-        self.espacamento_y = max(espacamento_y, 100)
+        self.espacamento_x = max(espacamento_x, 60)
+        self.espacamento_y = max(espacamento_y, 80)
         self.largura_grade = (colunas - 1) * self.espacamento_x
         self.x_centro_base = 400
         

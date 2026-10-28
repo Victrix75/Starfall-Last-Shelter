@@ -28,9 +28,20 @@ class Cenario:
         self.carregar_fundo()
 
     def carregar_fundo(self):
-        caminho = resolver_caminho_arquivo("cenario0.png")
+        caminhos_possiveis = [
+            "cenario1.png",
+            "cenario0.png",
+            "fundo.png",
+        ]
 
-        if not os.path.exists(caminho):
+        caminho = None
+        for nome_arquivo in caminhos_possiveis:
+            caminho = resolver_caminho_arquivo(nome_arquivo)
+            if os.path.exists(caminho):
+                break
+            caminho = None
+
+        if not caminho or not os.path.exists(caminho):
             return
 
         img = pygame.image.load(caminho).convert()
