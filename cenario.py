@@ -1,7 +1,6 @@
-import pygame
 import os
+import pygame
 
-# Caminho para a pasta onde estão guardadas as imagens do jogo
 ASSETS = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "front",
@@ -12,45 +11,59 @@ ASSETS = os.path.join(
 class Cenario:
     def __init__(self, tela):
         self.tela = tela
-        self.frame = 0
-        self.frames = []
-        self.carregar_frames()
+        self.fundo = None
+        self.velocidade_scroll = 1.2
+        self.offset_y = 0
+        self.carregar_fundo()
 
-    def carregar_frames(self):
-        # Obtém a largura e altura atuais da tela
+    def carregar_fundo(self):
+        caminho = os.path.join(ASSETS, "cenario0.png")
+
+        if not os.path.exists(caminho):
+            return
+
+        img = pygame.image.load(caminho).convert()
         largura_tela = self.tela.get_width()
-        altura_tela = self.tela.get_height()
 
-        # Lista com os nomes exatos das duas imagens do fundo
-        arquivos_cenario = ["cenario0.png"]
+        proporcao = largura_tela / img.get_width()
+        altura_ajustada = max(self.tela.get_height(), int(img.get_height() * proporcao))
+        self.fundo = pygame.transform.scale(img, (largura_tela, altura_ajustada))
 
-        for nome_arquivo in arquivos_cenario:
-            caminho = os.path.join(ASSETS, nome_arquivo)
-
-            if os.path.exists(caminho):
-                # Carrega a imagem
-                img = pygame.image.load(caminho).convert()
-
-                # Redimensiona a imagem para cobrir toda a tela
-                img = pygame.transform.scale(
-                    img, 
-                    (largura_tela, altura_tela)
-                )
-
-                self.frames.append(img)
+        # Começa mostrando a parte inferior da imagem para dar a sensação de início do cenário
+        self.offset_y = max(0, self.fundo.get_height() - self.tela.get_height())
 
     def atualizar_animacao(self):
-        # Incrementa o contador de quadros para a animação
-        self.frame += 1
+        if not self.fundo:
+            return
+
+        altura_fundo = self.fundo.get_height()
+        altura_tela = self.tela.get_height()
+
+        if altura_fundo <= altura_tela:
+            return
+
+        self.offset_y -= self.velocidade_scroll
+
+        while self.offset_y < 0:
+            self.offset_y += altura_fundo
+
+        while self.offset_y >= altura_fundo:
+            self.offset_y -= altura_fundo
 
     def desenhar(self):
-        if len(self.frames) > 0:
-            # Alterna a imagem a cada 10 quadros para a animação não ser rápida demais
-            # O operador % garante que o índice fica entre 0 e (quantidade de imagens - 1)
-            indice = (self.frame // 10) % len(self.frames)
-            
-            # Desenha a imagem de fundo a partir do canto superior esquerdo (0, 0)
-            self.tela.blit(self.frames[indice], (0, 0))
+        if not self.fundo:
+            return
 
-            # Atualiza a contagem para o próximo ciclo
-            self.atualizar_animacao()
+        self.atualizar_animacao()
+
+        altura_tela = self.tela.get_height()
+        altura_fundo = self.fundo.get_height()
+
+        if altura_fundo <= altura_tela:
+            self.tela.blit(self.fundo, (0, 0))
+            return
+
+        y = -self.offset_y
+        while y < altura_tela:
+            self.tela.blit(self.fundo, (0, y))
+            y += altura_fundo
