@@ -5,11 +5,23 @@ import random
 
 TAMANHO = 140
 
-ASSETS = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "front",
-    "sprites"
-)
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+ASSETS = os.path.join(BASE_PATH, "front", "sprites")
+
+
+def resolver_caminho_sprite(nome_sprite):
+    candidatos = [
+        os.path.join(ASSETS, nome_sprite),
+        os.path.join(ASSETS, "jogador", nome_sprite),
+        os.path.join(ASSETS, "inimigo", nome_sprite),
+        os.path.join(ASSETS, "nave_mae", nome_sprite),
+    ]
+
+    for caminho in candidatos:
+        if os.path.exists(caminho):
+            return caminho
+
+    return candidatos[0]
 
 
 class Sprites:
@@ -24,10 +36,8 @@ class Sprites:
         for direcao in ("direita", "esquerda", "cima", "baixo"):
             quadros = []
             for f in (0, 1):
-                caminho = os.path.join(
-                    ASSETS,
-                    f"{nome}{direcao}{f}.png"
-                )
+                nome_arquivo = f"{nome}{direcao}{f}.png"
+                caminho = resolver_caminho_sprite(nome_arquivo)
 
                 if os.path.exists(caminho):
                     img = pygame.image.load(caminho).convert_alpha()

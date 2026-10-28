@@ -3,11 +3,23 @@ import os
 import pygame
 
 
-ASSETS = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "front",
-    "sprites"
-)
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+ASSETS = os.path.join(BASE_PATH, "front")
+
+
+def resolver_caminho_arquivo(nome_arquivo):
+    locais = [
+        os.path.join(ASSETS, "cenario_e_tela", nome_arquivo),
+        os.path.join(ASSETS, "sprites", nome_arquivo),
+        os.path.join(BASE_PATH, nome_arquivo),
+    ]
+
+    for caminho in locais:
+        if os.path.exists(caminho):
+            return caminho
+
+    return os.path.join(ASSETS, "cenario_e_tela", nome_arquivo)
+
 
 class Telas:
 
@@ -22,7 +34,7 @@ class Telas:
         largura_tela = self.tela.get_width()
         altura_tela = self.tela.get_height()
 
-        caminho_fundo = os.path.join(ASSETS, "fundo.png")
+        caminho_fundo = resolver_caminho_arquivo("fundo.png")
         self.fundo = pygame.image.load(caminho_fundo).convert()
         self.fundo = pygame.transform.scale(
             self.fundo,

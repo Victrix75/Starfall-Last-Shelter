@@ -1,11 +1,22 @@
 import os
 import pygame
 
-ASSETS = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "front",
-    "sprites"
-)
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+ASSETS = os.path.join(BASE_PATH, "front")
+
+
+def resolver_caminho_arquivo(nome_arquivo):
+    locais = [
+        os.path.join(ASSETS, "cenario_e_tela", nome_arquivo),
+        os.path.join(ASSETS, "sprites", nome_arquivo),
+        os.path.join(BASE_PATH, nome_arquivo),
+    ]
+
+    for caminho in locais:
+        if os.path.exists(caminho):
+            return caminho
+
+    return os.path.join(ASSETS, "cenario_e_tela", nome_arquivo)
 
 
 class Cenario:
@@ -17,7 +28,7 @@ class Cenario:
         self.carregar_fundo()
 
     def carregar_fundo(self):
-        caminho = os.path.join(ASSETS, "cenario0.png")
+        caminho = resolver_caminho_arquivo("cenario0.png")
 
         if not os.path.exists(caminho):
             return
@@ -29,7 +40,6 @@ class Cenario:
         altura_ajustada = max(self.tela.get_height(), int(img.get_height() * proporcao))
         self.fundo = pygame.transform.scale(img, (largura_tela, altura_ajustada))
 
-        # Começa mostrando a parte inferior da imagem para dar a sensação de início do cenário
         self.offset_y = max(0, self.fundo.get_height() - self.tela.get_height())
 
     def atualizar_animacao(self):
