@@ -19,7 +19,7 @@ estado_atual = "menu"
 # Configuração de Fonte da HUD
 fonte_hud = pygame.font.SysFont("arial", 28, bold=True)
 
-frota = FrotaInimigos(linhas=2, colunas=3, pode_atacar=True, espacamento_x=70, espacamento_y=100)
+frota = FrotaInimigos(linhas=2, colunas=6, pode_atacar=True, espacamento_x=70, espacamento_y=100)
 nave = Nave()
 telas = Telas(tela)
 cenario = Cenario(tela)
@@ -71,6 +71,9 @@ while rodando:
         # Computa colisões e adiciona os pontos
         pontos = frota.checar_colisoes(nave.projeteis, nave)
         pontuacao += pontos
+
+        if not frota.inimigos:
+            frota = FrotaInimigos(linhas=2, colunas=6, pode_atacar=True, espacamento_x=70, espacamento_y=100)
 
         frota.desenhar(tela)
 
