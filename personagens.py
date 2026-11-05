@@ -269,7 +269,7 @@ class FrotaInimigos:
         self.projeteis = [] 
         self.offset_x = 0
         self.tempo_ultimo_tiro = pygame.time.get_ticks()
-        self.cooldown_tiro = 1200
+        self.cooldown_tiro = 800
         self.pode_atacar = pode_atacar
         self.espacamento_x = max(espacamento_x, 60)
         self.espacamento_y = max(espacamento_y, 80)
