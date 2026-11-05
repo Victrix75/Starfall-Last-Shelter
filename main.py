@@ -1,6 +1,6 @@
 import pygame
 from cenario import Cenario
-from personagens import Nave, FrotaInimigos
+from personagens import Explosao, Nave, FrotaInimigos
 from telas import Telas
 
 pygame.init()
@@ -23,6 +23,7 @@ frota = FrotaInimigos(linhas=3, colunas=12, pode_atacar=True, espacamento_x=70, 
 nave = Nave()
 telas = Telas(tela)
 cenario = Cenario(tela)
+explosao_jogador = None
 
 pontuacao = 0
 
@@ -43,6 +44,7 @@ while rodando:
                     frota = FrotaInimigos(linhas=2, colunas=8, pode_atacar=True, espacamento_x=70, espacamento_y=100)
                     nave = Nave()
                     pontuacao = 0
+                    explosao_jogador = None
                     estado_atual = "jogo"
 
                 elif telas.bot_creditos.collidepoint(evento.pos):
@@ -53,6 +55,15 @@ while rodando:
                     hasattr(telas, "bot_voltar")
                     and telas.bot_voltar.collidepoint(evento.pos)
                 ):
+                    estado_atual = "menu"
+            elif estado_atual == "game_over":
+                if telas.bot_tentar_novamente.collidepoint(evento.pos):
+                    frota = FrotaInimigos(linhas=2, colunas=8, pode_atacar=True, espacamento_x=70, espacamento_y=100)
+                    nave = Nave()
+                    pontuacao = 0
+                    explosao_jogador = None
+                    estado_atual = "jogo"
+                elif telas.bot_menu_principal.collidepoint(evento.pos):
                     estado_atual = "menu"
 
     tela.fill(cor_fundo)
@@ -72,7 +83,7 @@ while rodando:
         pontos = frota.checar_colisoes(nave.projeteis, nave)
         pontuacao += pontos
 
-        if not frota.inimigos:
+        if not frota.inimigos and not frota.explosoes:
             frota = FrotaInimigos(linhas=2, colunas=8, pode_atacar=True, espacamento_x=70, espacamento_y=100)
 
         frota.desenhar(tela)
@@ -85,10 +96,21 @@ while rodando:
 
         # Checa condição de Game Over
         if nave.vida <= 0:
-            estado_atual = "menu"
+            explosao_jogador = Explosao(nave.x, nave.y)
+            estado_atual = "morrendo"
 
         if hasattr(telas, "desenhar_voltar"):
             telas.desenhar_voltar()
+
+    elif estado_atual == "morrendo":
+        cenario.desenhar()
+        terminou = explosao_jogador.atualizar()
+        explosao_jogador.desenhar(tela)
+        if terminou:
+            estado_atual = "game_over"
+
+    elif estado_atual == "game_over":
+        telas.game_over()
 
     elif estado_atual == "creditos":
         telas.creditos()

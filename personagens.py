@@ -61,6 +61,36 @@ class Sprites:
         return quadros[(self.frame // 5) % len(quadros)]
 
 
+class Explosao:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.quadros = []
+        self.quadro_atual = 0
+        self.contador = 0
+        self.duracao_quadro = 5
+
+        for indice in range(4):
+            caminho = os.path.join(
+                ASSETS, "explosoes", f"explosaonave{indice}.png"
+            )
+            imagem = pygame.image.load(caminho).convert_alpha()
+            imagem = pygame.transform.scale(imagem, (TAMANHO, TAMANHO))
+            self.quadros.append(imagem)
+
+    def atualizar(self):
+        self.contador += 1
+        if self.contador >= self.duracao_quadro:
+            self.contador = 0
+            self.quadro_atual += 1
+
+        return self.quadro_atual >= len(self.quadros)
+
+    def desenhar(self, tela):
+        if self.quadro_atual < len(self.quadros):
+            tela.blit(self.quadros[self.quadro_atual], (self.x, self.y))
+
+
 class Projetil:
     def __init__(self, projx, projy):
         self.x = projx
@@ -267,6 +297,7 @@ class FrotaInimigos:
     def __init__(self, linhas=2, colunas=3, pode_atacar=True, espacamento_x=70, espacamento_y=100):
         self.inimigos = []
         self.projeteis = [] 
+        self.explosoes = []
         self.offset_x = 0
         self.tempo_ultimo_tiro = pygame.time.get_ticks()
         self.cooldown_tiro = 800
@@ -301,6 +332,10 @@ class FrotaInimigos:
         for inimigo in self.inimigos:
             inimigo.atualizar(self.offset_x)
 
+        for explosao in self.explosoes[:]:
+            if explosao.atualizar():
+                self.explosoes.remove(explosao)
+
         for proj in self.projeteis[:]:
             proj.atualizar()
             if proj.y > 1080:
@@ -320,6 +355,7 @@ class FrotaInimigos:
                     
                     if inimigo.vida <= 0:
                         self.inimigos.remove(inimigo)
+                        self.explosoes.append(Explosao(inimigo.x, inimigo.y))
                         pontos_ganhos += 5  # +5 Pontos por inimigo destruído
                     break
 
@@ -339,3 +375,6 @@ class FrotaInimigos:
 
         for proj in self.projeteis:
             proj.desenhar(tela)
+
+        for explosao in self.explosoes:
+            explosao.desenhar(tela)

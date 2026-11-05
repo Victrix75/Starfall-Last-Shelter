@@ -41,6 +41,13 @@ class Telas:
             (largura_tela, altura_tela)
         )
 
+        caminho_gameover = resolver_caminho_arquivo("tela_gameover.png")
+        self.tela_gameover = pygame.image.load(caminho_gameover).convert()
+        self.tela_gameover = pygame.transform.scale(
+            self.tela_gameover,
+            (largura_tela, altura_tela)
+        )
+
         # 3. Configuração dos botões do Menu Principal
         largura_botao = 250
         altura_botao = 60
@@ -54,6 +61,15 @@ class Telas:
         )
         self.bot_sair = pygame.Rect(
             x, altura_tela // 2 + 100, largura_botao, altura_botao
+        )
+
+        largura_botao_game_over = 320
+        x_game_over = (largura_tela - largura_botao_game_over) // 2
+        self.bot_tentar_novamente = pygame.Rect(
+            x_game_over, altura_tela - 270, largura_botao_game_over, altura_botao
+        )
+        self.bot_menu_principal = pygame.Rect(
+            x_game_over, altura_tela - 200, largura_botao_game_over, altura_botao
         )
 
         # 4. Configuração do Botão Voltar (Canto superior direito)
@@ -72,7 +88,12 @@ class Telas:
         self.txt_creditos = self.fonte.render("Créditos", True, self.cor_texto)
         self.txt_sair = self.fonte.render("Sair", True, self.cor_texto)
         self.txt_voltar = self.fonte.render("Voltar", True, self.cor_texto)
-
+        self.txt_tentar_novamente = self.fonte.render(
+            "Tentar de novo", True, self.cor_texto
+        )
+        self.txt_menu_principal = self.fonte.render(
+            "Menu principal", True, self.cor_texto
+        )
     def menu(self):
         """Desenha os botões da tela de Menu Principal."""
         self.tela.blit(self.fundo, (0, 0))
@@ -118,5 +139,16 @@ class Telas:
 
         # Desenha o botão voltar no canto superior direito
         self.desenhar_voltar()
+
+    def game_over(self):
+        self.tela.blit(self.tela_gameover, (0, 0))
+
+        botoes = [
+            (self.bot_tentar_novamente, self.txt_tentar_novamente),
+            (self.bot_menu_principal, self.txt_menu_principal),
+        ]
+        for botao, texto in botoes:
+            pygame.draw.rect(self.tela, self.cor_botao, botao, border_radius=10)
+            self.tela.blit(texto, texto.get_rect(center=botao.center))
 
 
